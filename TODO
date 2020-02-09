@@ -1,0 +1,47 @@
+System description
+    L'utente all'avvio deve inserire una lista di TASK da svolgere. Può far partire il TIMER  solo se la lista ha almeno
+    un elemento. La durata di TASK e PAUSA di ogni TASK inserito nella lista avranno valore pari al valore di default
+    per TASK e PAUSA definiti nelle settings del app.
+    ---
+    Quando parte il timer, per ogni JOB, ricordati di memorizzare la data di avvio, dato che si vuole predisporre la
+    memorizzazione di questi dati per via delle statistiche.
+    {
+        nome,
+        data_avvio,
+        durata
+    }
+    Ovviamente sono dati molto approssimativi, anche perchè potremmo effettuare una miglioria riguardo la data, ossia
+    mantenere un solo record, la cui PK è nome, e allo svolgimento ripetuto dello stesso task si va ad inserire una nuova
+    data in datE_avvio anzichè datA_avvio
+     ...........
+    ---
+
+Components
+    Timer:
+        Mostra il tempo rimanente sia di task_time che di pause_time;
+        Trigger di eventi come: ["taskStart", "taskPause", "taskEnd", ... ];
+        Alla partenza prende in input un Task, setta la durata del timer pari a quella del pomodoro,
+            al termine del pomodoro parte la durata del break,
+            al termine del break restituisce una Promise
+        Include la ProgressBar;  !! FORSE DIVENTA COMPONENTE INDIPENDENTE !!
+
+    Task scheduler:
+        Popola una queue di task;
+        Richiede il nome del task ed è predisposto con un tasto per l'aggiunta del task alla queue
+
+    TaskQueue:
+        Mantiene una coda di task che devono ancora partire;
+        Ogni task dalla task queue ha l'attributo pomodoro e break modificabili;
+        Una volta fatta partire la queue, essa aspetta la promise resistuita dal timer, quando viene invocato
+
+Object modeling
+    task{
+        name,
+        pomodoro,
+        breakDuration,
+        startDate
+    }
+
+
+Refactoring
+    Non voglio vedere stringhe libere, TRASFORMARLE IN CONSTANTI

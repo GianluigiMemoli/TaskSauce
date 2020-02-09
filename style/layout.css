@@ -1,0 +1,71 @@
+.set-grid{
+    display: grid;
+}
+
+.col-3{
+    display: grid;
+    grid-template-columns: repeat(3, 33.33%);
+}
+.col-6{
+    display: grid;
+    grid-template-columns: repeat(6, 16.66%);
+}
+.col-12{
+    display: grid;
+    grid-template-columns: repeat(12, 8.33%);
+}
+
+.row-1{
+    grid-template-rows: 100%;
+}
+
+.row-2{
+    grid-template-rows: 1fr 1fr;
+}
+.row-3{
+    grid-template-rows: repeat(3, 33.33%);
+}
+
+.row-6{
+    grid-template-rows: repeat(6, 16.6%);
+}
+
+.justify-i-center{
+    justify-items: center;
+}
+
+.justify-i-start{
+    justify-items: start;
+}
+
+.justify-s-right{
+    justify-self: right;
+}
+.justify-s-center{
+    justify-self: center;
+}
+
+
+.align-i-center{
+    align-items: center;
+}
+
+.fix{
+    position: fixed;
+    width: 100%;    
+    margin: 0;
+    top: 0;
+    padding: 0;
+    height: 10%;
+}
+
+@media screen and (max-width: 800px){
+    .col-sm-1{
+        display: grid;
+        grid-template-columns: minmax(0, 800px);
+    }
+
+    .justify-s-sm-base{
+        justify-self: center;
+    }
+}
