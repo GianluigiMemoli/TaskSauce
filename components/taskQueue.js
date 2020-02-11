@@ -63,11 +63,14 @@ class TaskQueue extends HTMLElement{
         this.attachShadow({mode: "open"});
         this.shadowRoot.appendChild(tableTemplate.content.cloneNode(true));
         this.tbody = this.shadowRoot.querySelector("tbody");
+        //If user inserts an invalid value for pomodoro or break this will be set true
+        this.invalidBreakInputs = new Set();
+        this.invalidPomodoroInputs = new Set();
     }
 
     connectedCallback(){
         console.log("q connected");
-
+        window.addEventListener("start",() => console.log("Ciao dalla queue"));
     }
 
     addTask(task){
@@ -86,10 +89,14 @@ class TaskQueue extends HTMLElement{
         //Setting behaviour for delete button
         let index = this.lastTaskID;
         newRecord.querySelector("#delete_btn").addEventListener('click', ()=> this._deleteTask(index));
+        //Listen any change to the inputs
+        newRecord.querySelector("#pomodoro_minutes").addEventListener("input",  () => this._pomodoroChanged(index));
+        newRecord.querySelector("#break_minutes").addEventListener("input",  () => this._breakChanged(index));
         //Effective insert of the row in tables
         this.tbody.appendChild(newRecord);
     }
 
+    //Removes a task thanks its index, then removes the table row that concerns the task
     _deleteTask(index){
         console.log("Removing task");
         delete this.queue[index];
@@ -97,19 +104,67 @@ class TaskQueue extends HTMLElement{
         this._deleteRow(index);
     }
 
-    _deleteRow(index){
+    _pomodoroChanged(taskIndex){
+        console.log(`pomodoro changed for id:${taskIndex}`);
+        let row = this._getRow(taskIndex);
+        let pomodoroMinuteInput = row.querySelector("#pomodoro_minutes");
+        let pomodoroMinute = pomodoroMinuteInput.value;
+        if(!Number.isInteger(pomodoroMinute) && pomodoroMinute <= 0){
+            pomodoroMinuteInput.setCustomValidity("Must be a positive integer");
+            this.invalidPomodoroInputs.add(row);
+        } else {
+            this.queue[taskIndex].pomodoro = pomodoroMinute * 60; //Must be in seconds!
+            if(this.invalidPomodoroInputs.has(row)){
+                this.invalidPomodoroInputs.delete(row);
+                pomodoroMinuteInput.setCustomValidity("");
+            }
+        }
+        //Update task's pomodoro value
+        console.log(this.queue[taskIndex]);
+    }
+
+    _breakChanged(taskIndex){
+        console.log(`break changed for id:${taskIndex}`);
+        let row = this._getRow(taskIndex);
+        let breakMinuteInput = row.querySelector("#break_minutes");
+        let breakMinute = breakMinuteInput.value;
+        if(!Number.isInteger(breakMinute) && breakMinute <= 0){
+            breakMinuteInput.setCustomValidity("Must be a positive integer");
+            this.invalidBreakInputs.add(row);
+        } else {
+            //Reset, in the case is was invalid
+            if(this.invalidBreakInputs.has(row)){
+                this.invalidBreakInputs.delete(row);
+                breakMinuteInput.setCustomValidity("");
+            }
+            this.queue[taskIndex].break = breakMinute * 60; //Must be in seconds!
+        }
+        //Update task's pomodoro value
+        console.log(this.queue[taskIndex]);
+    }
+
+
+
+    //Given an index it returns a table row, of the indexed task
+    _getRow(index){
         let row = this.shadowRoot.querySelector(`#task-id-${index}`);
+        return row;
+    }
+    _deleteRow(index){
+        let row = this._getRow(index);
+        this.invalidPomodoroInputs.delete(row);
+        this.invalidBreakInputs.delete(row);
         row.remove();
     }
 
 
-
     nextTask(){
-        return this.queue[this.queue.length - 1];
+        let firstTaskIndex = Object.keys(this.queue)[0];
+        return this.queue[firstTaskIndex];
     }
 
     hasNext(){
-        return (this.queue.length > 0);
+        return (Object.entries(this.queue).length > 0 &&  this.invalidBreakInputs.size === 0 && this.invalidPomodoroInputs.size === 0);
     }
 
 }

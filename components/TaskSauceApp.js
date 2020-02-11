@@ -23,18 +23,20 @@ class TaskSauceApp extends HTMLElement{
 
     connectedCallback(){
         this._setupItems();
-
         this.taskQueue = this.shadowRoot.querySelector("task-queue");
         this.timer = this.shadowRoot.querySelector("wc-timer");
         this.taskScheduler = this.shadowRoot.querySelector("task-scheduler");
         //If a new task is created the TaskScheduler triggers a 'newtask' event with it in the event object
         this.addEventListener("newtask", (event) => {
+            console.log(this.taskQueue);
             this.taskQueue.addTask(event.detail.task);
         });
         //Set listener on Start/Pause button of Timer
         this.addEventListener("start", (event) => {
-           if(this.queue.hasNext()){
-               this.timer.start(this.queue.nextTask());
+            console.log("Ascoltato uno start");
+           if(this.taskQueue.hasNext()){
+               console.log("il prossimo c'è");
+               this.timer.setTaskAndStart(this.taskQueue.nextTask());
            }
         });
     }
@@ -57,6 +59,11 @@ class TaskSauceApp extends HTMLElement{
         let taskScheduler = document.createElement("task-scheduler");
         this.taskScheduler = taskScheduler;
         this._insertItem(taskScheduler, "row-start-1", "col-start-2", "justify-s-center");
+    }
+
+    _save(task){
+        console.log("... save task stub .. ");
+        console.log(task);
     }
 
 }
