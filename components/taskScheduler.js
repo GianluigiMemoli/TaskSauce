@@ -7,9 +7,26 @@ schedulerTemplate.innerHTML = `
         :host{
             display: block;
         }
-      
+        #task_name{
+            background-color: white;
+            border: none;
+            border-radius: 0;
+            height: 2.5em;
+            -webkit-box-shadow: 1px 5px 18px -5px rgba(168,168,168,1);
+            -moz-box-shadow: 1px 5px 18px -5px rgba(168,168,168,1);
+            box-shadow: 1px 5px 18px -5px rgba(168,168,168,1);
+        }
+        #add{
+            background-color: transparent;
+            border: none;
+            font-size: 20pt;
+            vertical-align: middle;
+        }
+        #add:hover{
+            color: black;
+        }
      </style> 
-    <div><input type="text" name="task_name" placeholder="Task name"> <button name="add">Add</button></div>
+    <div><input id="task_name" type="text" name="task_name" placeholder="Task name"> <button id="add" name="add">+</button></div>
 `;
 
 class TaskScheduler extends HTMLElement{

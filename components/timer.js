@@ -12,10 +12,15 @@ const timerTemplate = document.createElement("template");
         display: block;
         font-size: 46pt;
     }    
-    
+    .pomodoro{
+    color:red;
+    }
+    .break{
+    color:green;
+    }
 </style>
     
-    <div><span class="minutes">00</span>:<span class="seconds">00</span></div>
+    <div id="time"><span class="minutes">00</span>:<span class="seconds">00</span></div>
     <div><button id="start_pause_btn">Start</button><button id="stop_btn">Stop</button></div>
 `;
 
@@ -32,14 +37,31 @@ const timerTemplate = document.createElement("template");
         this.innerSeconds = this.shadowRoot.querySelector(".seconds");
         this.innerMinutes = this.shadowRoot.querySelector(".minutes");
         this.startPauseBtn = this.shadowRoot.querySelector("#start_pause_btn");
+        this.timeDiv = this.shadowRoot.querySelector("#time");
+        this.stopBtn = this.shadowRoot.querySelector("#stop_btn");
         this.startPauseBtn.addEventListener("click",  this._handleStartPause.bind(this));
+        this.stopBtn.addEventListener("click", this._stop.bind(this));
+    }
+    set phase(value){
+        this._phase = value;
+        if (value == POMODORO_PHASE){
+            this.timeDiv.classList.remove("break");
+            this.timeDiv.classList.add("pomodoro");
+        } else if (value == BREAK_PHASE){
+            this.timeDiv.classList.remove("pomodoro");
+            this.timeDiv.classList.add("break");
+        }
+    }
+
+    get phase(){
+        return this._phase;
     }
     _handleStartPause(){
         console.log("premuto");
         console.log(this.state);
         if(this.state === STOP) {
             console.log("start event firing");
-            this.dispatchEvent(new CustomEvent("start", {bubbles: true, composed: true}));
+            this._askNextTask();
             //If there is any, the APPSAUCE will add a task to the timer
         } else if(this.state === START){
             this.dispatchEvent(new CustomEvent("pause", {bubbles: true, composed: true}));
@@ -51,6 +73,7 @@ const timerTemplate = document.createElement("template");
     }
 
     setTaskAndStart(task){
+        console.error(task);
         this.servingTask = task;
         this._start(task.pomodoro, POMODORO_PHASE);
         this.startPauseBtn.innerHTML = "Pause";
@@ -67,12 +90,13 @@ const timerTemplate = document.createElement("template");
         if(this.timeout === 0 && this.phase === POMODORO_PHASE){
             clearInterval(this.interval);
             console.log("stopped -> break");
-            this._start(this.servingTask.break, BREAK_PHASE);
+            this._start(this.servingTask.breakDuration, BREAK_PHASE);
+            //TODO beep beep beep m*f*ckers
+            this._pause();
         } else if (this.phase == BREAK_PHASE && this.timeout === 0){
-            clearInterval(this.interval);
-            //CODE FOR GET NEXT TASK OR STOP!!!!!!!!!!
+            this._stop();
+            this.dispatchEvent(new CustomEvent("task_end", {composed: true, bubbles: true, detail: {task: this.servingTask}}));
         } else{
-            console.log(`timeout: ${this.timeout}`)
             this.timeout--;
             let minutes = Math.floor(this.timeout / 60);
             let seconds = this.timeout % 60;
@@ -100,10 +124,21 @@ const timerTemplate = document.createElement("template");
         this.state = PAUSE;
     }
 
+    _stop(){
+        clearInterval(this.interval);
+        this.startPauseBtn.innerHTML = "Start";
+        this.state = STOP;
+        this.phase = POMODORO_PHASE;
+        this._setTime(0, 0);
+    }
+
     _resume(){
         this.state = START;
         this.startPauseBtn.innerHTML = "Pause";
         this._setupTimer(this.timeout);
+    }
+    _askNextTask(){
+        this.dispatchEvent(new CustomEvent("task_start", {bubbles: true, composed: true}));
     }
 }
 

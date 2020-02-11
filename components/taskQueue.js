@@ -1,4 +1,3 @@
-// TODO: change this constant in setting based value
 const POMODORO = 25;
 const BREAK = 5;
 const tableTemplate = document.createElement("template");
@@ -137,7 +136,7 @@ class TaskQueue extends HTMLElement{
                 this.invalidBreakInputs.delete(row);
                 breakMinuteInput.setCustomValidity("");
             }
-            this.queue[taskIndex].break = breakMinute * 60; //Must be in seconds!
+            this.queue[taskIndex].breakDuration = breakMinute * 60; //Must be in seconds!
         }
         //Update task's pomodoro value
         console.log(this.queue[taskIndex]);
@@ -157,6 +156,9 @@ class TaskQueue extends HTMLElement{
         row.remove();
     }
 
+    _firstIndex(){
+        return Object.keys(this.queue)[0];
+    }
 
     nextTask(){
         let firstTaskIndex = Object.keys(this.queue)[0];
@@ -167,5 +169,9 @@ class TaskQueue extends HTMLElement{
         return (Object.entries(this.queue).length > 0 &&  this.invalidBreakInputs.size === 0 && this.invalidPomodoroInputs.size === 0);
     }
 
+    taskDone(){
+        let indexToPop = this._firstIndex();
+        this._deleteTask(indexToPop);
+    }
 }
 customElements.define("task-queue", TaskQueue);

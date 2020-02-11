@@ -31,14 +31,21 @@ class TaskSauceApp extends HTMLElement{
             console.log(this.taskQueue);
             this.taskQueue.addTask(event.detail.task);
         });
+
         //Set listener on Start/Pause button of Timer
-        this.addEventListener("start", (event) => {
+        this.addEventListener("task_start", (event) => {
             console.log("Ascoltato uno start");
            if(this.taskQueue.hasNext()){
                console.log("il prossimo c'è");
                this.timer.setTaskAndStart(this.taskQueue.nextTask());
            }
         });
+        //When the task has ended remove it from the queue and save in DB
+        this.addEventListener("task_end", (event) => {
+            let taskToSave = event.detail.task;
+            this._save(taskToSave);
+            this.taskQueue.taskDone();
+        })
     }
 
     _insertItem(element, ...attributes){
