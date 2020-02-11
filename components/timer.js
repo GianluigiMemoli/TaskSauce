@@ -39,7 +39,7 @@ const timerTemplate = document.createElement("template");
         console.log(this.state);
         if(this.state === STOP) {
             console.log("start event firing");
-            window.dispatchEvent(new CustomEvent("start", {bubbles: true, composed: true}));
+            this.dispatchEvent(new CustomEvent("start", {bubbles: true, composed: true}));
             //If there is any, the APPSAUCE will add a task to the timer
         } else if(this.state === START){
             this.dispatchEvent(new CustomEvent("pause", {bubbles: true, composed: true}));
