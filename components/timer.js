@@ -1,9 +1,13 @@
+import "../node_modules/progressbar.js/dist/progressbar.js";
+
 const START = 1;
 const PAUSE = 0;
 const STOP = 2;
 
 const POMODORO_PHASE = 'POMODORO';
 const BREAK_PHASE = 'BREAK';
+const BREAK_COLOR = "#bbeaa6";
+const POMODORO_COLOR = "#ed9a73";
 const timerTemplate = document.createElement("template");
 
  timerTemplate.innerHTML = `
@@ -12,16 +16,29 @@ const timerTemplate = document.createElement("template");
         display: block;
         font-size: 46pt;
     }    
-    .pomodoro{
-    color:red;
+    
+       
+    #time{
+    text-align: center;
     }
-    .break{
-    color:green;
+    #prog{
+        margin-top: 1em;
+        height: 5em; 
+        width: 5em;        
+    }
+    #btns{
+        display: flex;
+        justify-content: center;
+        margin-top: 1em;
     }
 </style>
     
-    <div id="time"><span class="minutes">00</span>:<span class="seconds">00</span></div>
-    <div><button id="start_pause_btn">Start</button><button id="stop_btn">Stop</button></div>
+<audio id="timer_buzz" loop>
+    <source src="../timer_sound/timer.mp3" type="audio/mpeg">     
+</audio>
+
+    <div id="prog"></div>
+    <div id="btns"><button id="start_pause_btn">Start</button><button id="stop_btn">Stop</button></div>
 `;
 
  class Timer extends HTMLElement{
@@ -34,28 +51,42 @@ const timerTemplate = document.createElement("template");
     }
 
     connectedCallback() {
-        this.innerSeconds = this.shadowRoot.querySelector(".seconds");
-        this.innerMinutes = this.shadowRoot.querySelector(".minutes");
         this.startPauseBtn = this.shadowRoot.querySelector("#start_pause_btn");
-        this.timeDiv = this.shadowRoot.querySelector("#time");
         this.stopBtn = this.shadowRoot.querySelector("#stop_btn");
+        this.timerBuzz = this.shadowRoot.querySelector("#timer_buzz");
         this.startPauseBtn.addEventListener("click",  this._handleStartPause.bind(this));
         this.stopBtn.addEventListener("click", this._stop.bind(this));
+        this.progressBar = new ProgressBar.Circle(this.shadowRoot.querySelector("#prog"), {
+            text:{value: "00:00", alignToBottom: true},
+            strokeWidth: 2,
+            trailColor:"#f1f3f4",
+            fill: "#f1f3f4"
+        });
+        this.phase = POMODORO_PHASE;
+        this._loadProgressbarProgress(1, 800);
+        console.log(this.progressBar);
+
     }
+
+    /*
+    * step: function(state, circle, attachment) {
+        circle.path.setAttribute('stroke', state.color);
+    },
+    * */
     set phase(value){
         this._phase = value;
-        if (value == POMODORO_PHASE){
-            this.timeDiv.classList.remove("break");
-            this.timeDiv.classList.add("pomodoro");
-        } else if (value == BREAK_PHASE){
-            this.timeDiv.classList.remove("pomodoro");
-            this.timeDiv.classList.add("break");
-        }
+        if(value === BREAK_PHASE) {
+            this._setProgressbarColor(BREAK_COLOR);
+        }else{
+            this._setProgressbarColor(POMODORO_COLOR);
+            }
+
     }
 
     get phase(){
         return this._phase;
     }
+
     _handleStartPause(){
         console.log("premuto");
         console.log(this.state);
@@ -68,12 +99,13 @@ const timerTemplate = document.createElement("template");
             this._pause();
             //Here YOU MUST CALL THE PAUSE METHOD AND NOT LET THE APPSAUCE COMPONENT CALL IT!
         } else if(this.state === PAUSE){
+
             this._resume();
         }
     }
 
     setTaskAndStart(task){
-        console.error(task);
+        console.log("Setting: "+task);
         this.servingTask = task;
         this._start(task.pomodoro, POMODORO_PHASE);
         this.startPauseBtn.innerHTML = "Pause";
@@ -81,9 +113,10 @@ const timerTemplate = document.createElement("template");
 
 
 
-    _setupTimer(timeout){
+    _setupTimer(timeout) {
         this.timeout = timeout;
-        this.interval = setInterval(this._updateTime.bind(this), 100)
+        this.progressStep = 1 / timeout;
+        this.interval = setInterval(this._updateTime.bind(this), 100);
     }
 
     _updateTime(){
@@ -91,9 +124,9 @@ const timerTemplate = document.createElement("template");
             clearInterval(this.interval);
             console.log("stopped -> break");
             this._start(this.servingTask.breakDuration, BREAK_PHASE);
-            //TODO beep beep beep m*f*ckers
             this._pause();
-        } else if (this.phase == BREAK_PHASE && this.timeout === 0){
+            this.timerBuzz.play();
+        } else if (this.phase === BREAK_PHASE && this.timeout === 0){
             this._stop();
             this.dispatchEvent(new CustomEvent("task_end", {composed: true, bubbles: true, detail: {task: this.servingTask}}));
         } else{
@@ -105,9 +138,19 @@ const timerTemplate = document.createElement("template");
         }
     }
 
+
     _setTime(minutes, seconds){
-        this.innerSeconds.innerHTML = _stylizeTime(seconds);
-        this.innerMinutes.innerHTML = _stylizeTime(minutes);
+        this.progressBar.setText(`${_stylizeTime(minutes)}:${_stylizeTime(seconds)}`);
+        //this.progressBar.set(this.progressBar.value() - this.progressStep);
+        let newProgress;
+        if (this.progressBar.value() - this.progressStep < 0){
+            newProgress = 0;
+        }
+        else {
+            newProgress = this.progressBar.value() - this.progressStep;
+        }
+
+        this._loadProgressbarProgress(newProgress, 50);
     }
 
      _start(timeout, phase){
@@ -115,8 +158,10 @@ const timerTemplate = document.createElement("template");
          this.phase = phase;
          if (phase === BREAK_PHASE)
              console.log("launching break");
+         this._loadProgressbarProgress(1, 800);
          this._setupTimer(timeout);
-     }
+
+         }
 
     _pause(){
         clearInterval(this.interval);
@@ -130,15 +175,34 @@ const timerTemplate = document.createElement("template");
         this.state = STOP;
         this.phase = POMODORO_PHASE;
         this._setTime(0, 0);
+        this._loadProgressbarProgress(1, 800);
     }
 
     _resume(){
+        this.timerBuzz.pause();
         this.state = START;
         this.startPauseBtn.innerHTML = "Pause";
         this._setupTimer(this.timeout);
     }
     _askNextTask(){
         this.dispatchEvent(new CustomEvent("task_start", {bubbles: true, composed: true}));
+    }
+
+    _setProgressbarColor(color){
+        this.progressBar.path.setAttribute('stroke', `${color}`);
+        console.log(this.progressBar.path.attributes.stroke);
+        console.log(this.progressBar.text.style);
+        this.progressBar.text.style["color"] =  `'${color}'`;
+    }
+
+    _loadProgressbarProgress(progress, duration){
+        this.progressBar.animate(progress, {
+            duration: duration,
+            offset: 0
+        },
+            function () {
+                console.log('Animation has finished');
+            });
     }
 }
 

@@ -56,7 +56,6 @@ tableRecord.innerHTML = `
 class TaskQueue extends HTMLElement{
     constructor(){
         super();
-        console.log("tq");
         this.queue = {};
         this.lastTaskID = 0;
         this.attachShadow({mode: "open"});
@@ -99,7 +98,7 @@ class TaskQueue extends HTMLElement{
     _deleteTask(index){
         console.log("Removing task");
         delete this.queue[index];
-        console.log(this.queue);
+        //  console.log(this.queue);
         this._deleteRow(index);
     }
 

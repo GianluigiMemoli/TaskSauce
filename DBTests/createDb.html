@@ -1,0 +1,26 @@
+<html  lang="it">
+<head><meta charset="utf-8"> </head>
+<body>
+<script>
+    let openRequest = indexedDB.open('itemDB', 3);
+    //Setting event listeners
+    openRequest.onupgradeneeded = function () {
+        let db = openRequest.result;
+        if(!db.objectStoreNames.contains("items")){
+            console.log("Creo object store");
+            db.createObjectStore("items", {keyPath: 'id', autoIncrement: true});
+        }
+    };
+    openRequest.onsuccess = function () {
+        console.log("Succcc");
+    };
+    openRequest.onerror = function () {
+        console.log("ERRRRR");
+    };
+    openRequest.onblocked = function(){
+        console.log("BLOCK");
+    };
+    console.log("so viv") ;
+</script>
+</body>
+</html>
