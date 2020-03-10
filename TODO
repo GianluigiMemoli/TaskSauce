@@ -1,7 +1,0 @@
-Suoneria al termine di pomodoro e break;
-Salvataggio task, con id autoincrementante, aggiungerci la data di fine;
-Grafico:
-    visualizzazione in un periodo di tempo del numero di volte che abbiamo eseguito un determinato task,
-    avendo come x i task e y le volte che sono state eseguite, come limite superiore il numero max di esecuzioni di un task
-    
-
