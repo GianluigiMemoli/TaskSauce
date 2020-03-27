@@ -1,1 +1,9 @@
 .idea
+node_modules
+bower_components
+DBTests
+TODO
+dbtester.html
+package-lock.json
+dist
+src/responsive_debug.js
