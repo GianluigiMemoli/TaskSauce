@@ -1,4 +1,4 @@
-import "../node_modules/progressbar.js/dist/progressbar.js";
+const ProgressBar = require("progressbar.js");
 
 const START = 1;
 const PAUSE = 0;
@@ -12,33 +12,39 @@ const timerTemplate = document.createElement("template");
 
  timerTemplate.innerHTML = `
 <style>  
+ @import "../../style/layout.css"; 
     :host{
         display: block;
-        font-size: 46pt;
+        font-size: 46pt;        
     }    
-    
-       
+               
     #time{
     text-align: center;
     }
+    
     #prog{
         margin-top: 1em;
         height: 5em; 
         width: 5em;        
     }
+    
     #btns{
         display: flex;
         justify-content: center;
         margin-top: 1em;
+    }
+    #timer_container{
+        padding: 0.5em;
     }
 </style>
     
 <audio id="timer_buzz" loop>
     <source src="../timer_sound/timer.mp3" type="audio/mpeg">     
 </audio>
-
-    <div id="prog"></div>
-    <div id="btns"><button id="start_pause_btn">Start</button><button id="stop_btn">Stop</button></div>
+<div id="timer_container" class="white-box shady roundy">
+        <div id="prog"></div>
+        <div id="btns"><button id="start_pause_btn">Start</button><button id="stop_btn">Stop</button></div>
+</div>          
 `;
 
  class Timer extends HTMLElement{
@@ -171,11 +177,13 @@ const timerTemplate = document.createElement("template");
 
     _stop(){
         clearInterval(this.interval);
+        this.timerBuzz.pause();
         this.startPauseBtn.innerHTML = "Start";
         this.state = STOP;
         this.phase = POMODORO_PHASE;
         this._setTime(0, 0);
         this._loadProgressbarProgress(1, 800);
+        this.dispatchEvent(new CustomEvent("task_stop", {bubbles: true, composed: true}));
     }
 
     _resume(){

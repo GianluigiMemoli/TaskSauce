@@ -1,4 +1,4 @@
-@font-face {
+/*@font-face {
     font-family: 'Raleway Bold';
     src: url("../fonts/Raleway-Light.ttf");
 }
@@ -15,4 +15,24 @@
 
 .bold{
     font-family: 'Raleway Bold', sans-serif;
+}*/
+@font-face {
+    font-family: 'BalooChettan2 Regular';
+    src: url("../fonts/BalooChettan2-Regular.ttf");
+}
+
+@font-face {
+    font-family: 'BalooChettan2 Bold';
+    src: url("../fonts/BalooChettan2-Bold.ttf");
+}
+
+
+
+
+.regular{
+    font-family: 'BalooChettan2 Regular', sans-serif;
+}
+
+.bold{
+    font-family: 'BalooChettan2 Bold', sans-serif;
 }

@@ -1,10 +1,10 @@
-.row-filling{
-    grid-template-rows: 100%;
-}
-.dio{
-    color: blue;
-}
+
+
 @media screen and (min-width: 801px){
+    .row-filling{
+        grid-template-rows: 100vh;
+    }
+
     .col-start-1{
         grid-column-start: 1;
     }
@@ -18,7 +18,7 @@
     }
 
     .col-start-4{
-        grid-column-start: 4;
+        grid-column-start: 3;
     }
 
     .col-start-5{
@@ -130,8 +130,6 @@
     .row-start-6{
         grid-row-start: 6;
     }
-
-
 
 }
 
@@ -245,10 +243,23 @@
     .row-s-start-2{
         grid-row-start: 2;
     }
-    
-    
+
+
     .row-s-start-3{
         grid-row-start: 3;
     }
-    
+
+    .row-s-start-4{
+        grid-row-start: 3;
+    }
+
+    .row-s-start-5{
+        grid-row-start: 3;
+    }
+
+    .row-s-start-6{
+        grid-row-start: 3;
+    }
+
+
 }

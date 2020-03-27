@@ -1,56 +1,159 @@
+const Task = require("../classes/model/Task.js");
 const POMODORO = 25;
 const BREAK = 5;
 const tableTemplate = document.createElement("template");
 tableTemplate.innerHTML = `
 <style>
+ @import "../../style/layout.css"; 
+ @import "../../style/grid_behaviour.css";
+ @import "../../style/typography.css"
+ @import '../../node_modules/material-design-icons/iconfont/material-icons.css';
+
 :host{
-    display: block;
-}     
-h3{
-    text-align: left; 
+    display: block;        
+}  
+.scrollable-wrapper{
+   display: block;
+   overflow-y: auto;
+   overflow-x: hidden;
+   padding: 2em;
+   font-family: 'BalooChettan2 Regular', sans-serif;
+   width: 30em;
+   height: 30em;
+}  
+
+@media screen and (max-width: 800px){
+    .scrollable-wrapper{
+       margin-top: 50px;
+       }
 }
 
-th, td{
-    padding: 1em;
+
+
+.table-flex{
+    /*display: flex;
+    flex-direction: column;        
+    width: 100%;
+    */
+    display: grid;
+    width: 100%;
+    grid-auto-rows: 100%;
+    row-gap: 1em;
 }
-tbody td{
-    border-bottom: 1px solid black;
+.trow{
+    display: grid;
+    grid-template-columns: 33% 33% 33% 10%;          
+    justify-content: left;          
+}
+.tdata{
+    display: inline-block;
+    text-align: center;
+    width: 5em;
+}
+.col1{
+    grid-column-start: 1;
+    grid-column-end: 1;
+}
+
+.col2{
+    grid-column-start: 2;
+    grid-column-end: 2;
+}
+
+.col3{
+    grid-column-start: 3;
+    grid-column-end: 3;
+}
+.col12{
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+.col23{
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+
+.col34{
+    grid-column-start: 3;
+    grid-column-end: 4;
+}
+
+
+.col4{
+    grid-column-start: 4;
+    grid-column-end: 4;
+}
+
+.tdata > input {
+    width: 40%;       
+    margin-top: 2.5px; 
+}
+
+@media screen and (max-width: 800px){
+    :host{
+        margin-top: 35%;
+    }
+    .scrollable-wrapper{
+        width: 80vw;
+        justify-self: center;
+    }
 }
 
 </style>
 
-<h3>Task queue</h3>
-<table cellspacing="0">
-<thead>
-<tr>
-    <th>Name</th>
-    <th>Pomodoro<br><small>(min)</small></th>
-    <th>Break<br><small>(min)</small></th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
+<div class="scrollable-wrapper shady white-box roundy justify-s-sm-center shady">
+    <div class="table-flex">
+        <div class="trow">
+            <div class="tdata col12">
+                <span>Name</span>
+            </div>
+            <div class="tdata col23">
+                <span>Pomodoro</span>
+            </div>
+            <div class="tdata col34">
+                <span>Break</span>
+            </div>            
+        </div>        
+    </div>
+</div>
 `;
 
 const tableRecord = document.createElement("template");
 tableRecord.innerHTML = `
-    <style>
-    #pomodoro_minutes, 
-    #break_minutes{
-        width: 5em;
-        text-align: center;
-        background: white;
-        border: none; 
-        border-bottom: solid black 1px;        
+    <style>   
+     @import '../../node_modules/material-design-icons/iconfont/material-icons.css';
+
+    #name_value{
+        overflow-x: auto;
+        line-height: 40px;
+    }
+    #delete_btn{
+        display: none;
+        margin-left: -1.5em;  
+        margin-top: 7px;
+    }
+
+    .trow:hover > #delete_btn{
+        display: inline-block;
+    } 
+    
+    @media screen and (max-width: 800px){
+    #delete_btn{
+        display: inline-block;
+        margin-left: -1.5em;
+    }
+    }
+    .active{
+        background-color: #e0f5b9;
     }
     </style>
-    <tr>
-    <td id="name"></td>
-    <td id="pomodoro"><input id="pomodoro_minutes" type="number"></td>
-    <td id="break"><input id="break_minutes" type="number"></td>
-    <td id="del"><button id="delete_btn">del</button></td>
-    </tr>
+     <div class="trow regular record grey-box">
+     <div class="tdata col1"><span id="name_value"></span></div>
+     <div class="tdata col2"><input id="pomodoro_minutes" type="number"></div>
+     <div class="tdata col3"><input id="break_minutes" type="number"></div>                 
+     <a id="delete_btn"><span class="material-icons">delete</span></a>     
+    </div>
 `;
 
 class TaskQueue extends HTMLElement{
@@ -60,7 +163,7 @@ class TaskQueue extends HTMLElement{
         this.lastTaskID = 0;
         this.attachShadow({mode: "open"});
         this.shadowRoot.appendChild(tableTemplate.content.cloneNode(true));
-        this.tbody = this.shadowRoot.querySelector("tbody");
+        this.tbody = this.shadowRoot.querySelector(".table-flex");
         //If user inserts an invalid value for pomodoro or break this will be set true
         this.invalidBreakInputs = new Set();
         this.invalidPomodoroInputs = new Set();
@@ -71,6 +174,7 @@ class TaskQueue extends HTMLElement{
         window.addEventListener("start",() => console.log("Ciao dalla queue"));
     }
 
+
     addTask(task){
         //Adding task to the queue, with an incremented id
         this.queue[++this.lastTaskID] = task;
@@ -78,12 +182,12 @@ class TaskQueue extends HTMLElement{
         //Transform the task in a table row
         let newRecord = tableRecord.content.cloneNode(true);
         //Setting task-id to the <tr>
-        newRecord.querySelector("tr").id = `task-id-${this.lastTaskID}`;
+        newRecord.querySelector(".trow").id = `task-id-${this.lastTaskID}`;
         //Setting task values
-        newRecord.querySelector("#name").innerHTML = task.name;
+        newRecord.querySelector(".trow > .tdata > #name_value").innerHTML = task.name;
         //Default values or user's settings values
-        newRecord.querySelector("#pomodoro_minutes").valueAsNumber = POMODORO;
-        newRecord.querySelector("#break_minutes").valueAsNumber = BREAK;
+        newRecord.querySelector("#pomodoro_minutes").valueAsNumber = task.pomodoro / 60;
+        newRecord.querySelector("#break_minutes").valueAsNumber = task.breakDuration / 60;
         //Setting behaviour for delete button
         let index = this.lastTaskID;
         newRecord.querySelector("#delete_btn").addEventListener('click', ()=> this._deleteTask(index));
@@ -98,7 +202,6 @@ class TaskQueue extends HTMLElement{
     _deleteTask(index){
         console.log("Removing task");
         delete this.queue[index];
-        //  console.log(this.queue);
         this._deleteRow(index);
     }
 
@@ -145,8 +248,7 @@ class TaskQueue extends HTMLElement{
 
     //Given an index it returns a table row, of the indexed task
     _getRow(index){
-        let row = this.shadowRoot.querySelector(`#task-id-${index}`);
-        return row;
+        return this.shadowRoot.querySelector(`#task-id-${index}`);
     }
     _deleteRow(index){
         let row = this._getRow(index);
@@ -161,7 +263,15 @@ class TaskQueue extends HTMLElement{
 
     nextTask(){
         let firstTaskIndex = Object.keys(this.queue)[0];
+        let row = this._getRow(firstTaskIndex);
+        row.classList.add("active");
         return this.queue[firstTaskIndex];
+    }
+
+    releaseTask(){
+        let firstTaskIndex = Object.keys(this.queue)[0];
+        let row = this._getRow(firstTaskIndex);
+        row.classList.remove("active");
     }
 
     hasNext(){
@@ -171,6 +281,23 @@ class TaskQueue extends HTMLElement{
     taskDone(){
         let indexToPop = this._firstIndex();
         this._deleteTask(indexToPop);
+    }
+
+    getQueue(){
+        return this.queue;
+    }
+
+    setQueue(queue){
+        console.log("setQueue");
+        console.log("QUEUE");
+        console.log(queue);
+        for (let taskID in queue){
+            console.log(`TaskID: ${taskID}`);
+            console.log(queue[taskID]);
+            let task = Object.setPrototypeOf(queue[taskID], Task.task.prototype);
+            this.addTask(queue[taskID], task);
+
+        }
     }
 }
 customElements.define("task-queue", TaskQueue);

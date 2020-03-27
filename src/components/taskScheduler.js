@@ -4,18 +4,33 @@ const schedulerTemplate = document.createElement("template");
 
 schedulerTemplate.innerHTML = `
     <style>    
+    @import "../../style/layout.css"; 
+    @import "../../style/grid_behaviour.css";
+    @import "../../style/typography.css"; 
         :host{
             display: block;
         }
+        
+        
         #task_name{
-            background-color: white;
+            background-color white;
             border: none;
-            border-radius: 0;
-            height: 2.5em;
-            -webkit-box-shadow: 1px 5px 18px -5px rgba(168,168,168,1);
-            -moz-box-shadow: 1px 5px 18px -5px rgba(168,168,168,1);
-            box-shadow: 1px 5px 18px -5px rgba(168,168,168,1);
+            height: 2.5em;            
+            border-radius: 90px;          
+            padding: 0.2em;                          
         }
+        
+        @media screen and (max-width: 800px){
+            :host{
+              margin-top: 5%;                  
+            }
+            #task_name{                                   
+                height: auto; 
+                width: auto;
+                padding: 0.2em;                                      
+            }
+        }
+        
         #add{
             background-color: transparent;
             border: none;
@@ -25,8 +40,18 @@ schedulerTemplate.innerHTML = `
         #add:hover{
             color: black;
         }
+        #scheduler{
+            display: flex;                        
+            flex-wrap: nowrap;
+            align-self: center;
+            margin-bottom: 4em;
+            border-radius: 100px;
+            justify-content: flex-start;
+            background: rgb(131,58,180);
+            background: linear-gradient(90deg, rgba(131,58,180,1) 0%, rgba(253,29,29,1) 0%, rgba(252,120,54,1) 100%, rgba(252,176,69,1) 100%);  
+        }
      </style> 
-    <div><input id="task_name" type="text" name="task_name" placeholder="Task name"> <button id="add" name="add">+</button></div>
+    <div id="scheduler" class="shady"><input id="task_name" type="text" name="task_name" placeholder="Task name"><button id="add" name="add">+</button></div>
 `;
 
 class TaskScheduler extends HTMLElement{
@@ -44,7 +69,7 @@ class TaskScheduler extends HTMLElement{
     }
 
     _checkTaskName(name){
-        this.tasknameField.setCustomValidity("")
+        this.tasknameField.setCustomValidity("");
         if (!name.replace(/\s/g, '').length) {
             this._errTaskName("Task name must be non empty");
             return false;
@@ -63,6 +88,7 @@ class TaskScheduler extends HTMLElement{
             let taskEvent = new CustomEvent("newtask", {detail: {"task": newTask}, bubbles: true, composed: true});
             this.shadowRoot.dispatchEvent(taskEvent);
             console.log("Creato task ed evento");
+            this.tasknameField.value="";
         }
     }
 

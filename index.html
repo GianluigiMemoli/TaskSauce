@@ -1,23 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script type="module" src="components/taskScheduler.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <script src="dist/main.js"></script>
     <link rel="stylesheet" href="style/main.css" type="text/css">
     <link rel="stylesheet" href="style/typography.css" type="text/css">
-    <script type="module" src="components/timer.js"></script>
-    <script src="components/taskQueue.js"></script>
-    <script type="module" src="components/TaskSauceApp.js"></script>
-
     <meta charset="UTF-8">
+    <link href="https://cdn.lineicons.com/2.0/LineIcons.css" rel="stylesheet">
     <title>TaskSauce</title>
 </head>
+<style>
+    body {
+        padding: 0;
+        margin: 0;
+        height: 100vh;
+        background-color: #F0F4F9;
+        overflow: hidden;
+    }
+    @media screen and(max-width: 800px) {
+        body {
+            overflow: auto;
+            padding: 10%;
+        }
+    }
+
+</style>
 <body>
-    <header>
-        <h2 class="app-title bold">Task sauce</h2>
-    </header>
+
         <main>
-                <task-sauce>
-                </task-sauce>
+               <tasksauce-app>
+               </tasksauce-app>
         </main>
     </body>
 
