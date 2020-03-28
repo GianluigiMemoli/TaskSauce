@@ -29,8 +29,6 @@ class TaskDAO_ {
 
             openRequest.onsuccess = function () {
                 let db = openRequest.result;
-                //console.log("From promise\n" + db);
-                //console.log("Has store:" + db.objectStoreNames.contains(TASK_STORE));
                 resolve(db);
             };
 
@@ -44,13 +42,10 @@ class TaskDAO_ {
         return new Promise(((resolve, reject) => {
             let transaction = this.db.transaction(TASK_STORE, 'readwrite');
             let objStore = transaction.objectStore(TASK_STORE);
-            //console.log(`before parsing ${task.startDate}`);
             task.startDate = new Date(task.startDate);
-            //console.log(`before saving ${task.startDate}`);
             let addRequest = objStore.add(task);
             addRequest.onsuccess = () => resolve("Fine");
             addRequest.onerror = () => {
-                //console.log("(TDAO)Error: "+addRequest.error);
                 reject(addRequest.error);
             }
         }));
@@ -63,7 +58,6 @@ class TaskDAO_ {
             let clearRequest = objStore.clear();
             clearRequest.onsuccess = () => resolve("Fine");
             clearRequest.onerror = () => {
-                //console.log("(TDAO)Error: "+clearRequest.error);
                 reject(clearRequest.error);
             }
         }));
@@ -76,7 +70,6 @@ class TaskDAO_ {
             let objStore = transaction.objectStore(TASK_STORE);
             let getRequest = objStore.getAll();
             getRequest.onsuccess = function () { 
-                //console.log("RAW:\n" + getRequest.result);
                 let results;
                 if(group){
                     /*
