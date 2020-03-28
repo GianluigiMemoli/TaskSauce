@@ -15,6 +15,6 @@
     "webpack-cli": "^3.3.11"
   },
   "scripts": {
-    "start": "static-server -i index.html -n index.html -p 8080"
+    "start": "static-server -i index.html -n index.html -p $PORT"
   }
 }
