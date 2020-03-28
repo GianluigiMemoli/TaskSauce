@@ -4,14 +4,16 @@
   "dependencies": {
     "@vaadin/router": "latest",
     "chart.js": "^2.9.3",
-    "intro.js": "^2.9.3",
     "moment": "^2.24.0",
     "progressbar.js": "git://github.com/Zellerich/progressbar.js.git#0978bd7a45c1e1fcc8cf9b0890caddb5362941f6",
+    "static-server": "^2.2.1",
     "sweetalert2": "^9.10.6"
   },
   "devDependencies": {
     "webpack": "^4.42.0",
     "webpack-cli": "^3.3.11"
   },
-  "scripts": {"start": "static-server -o -i index.html -n index.html -p 9081"}
+  "scripts": {
+    "start": "static-server -o -i index.html -n index.html -p 9081"
+  }
 }
