@@ -15,6 +15,7 @@
     "webpack-cli": "^3.3.11"
   },
   "scripts": {
+    "install": "npx webpack --config webpack.config.js",
     "start": "static-server -i index.html -n index.html -p $PORT"
   }
 }
