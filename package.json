@@ -16,6 +16,6 @@
   },
   "scripts": {
     "install": "npx webpack --config webpack.config.js",
-    "start": "static-server -i index.html -n index.html -p 9080"
+    "start": "static-server -i index.html -n index.html -p $PORT"
   }
 }
