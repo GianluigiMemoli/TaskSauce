@@ -14,16 +14,12 @@
         margin: 0;
         height: 100vh;
         background-color: #F0F4F9;
+        overflow: hidden;
     }
     @media screen and(max-width: 800px) {
         body {
             overflow: auto;
             padding: 10%;
-        }
-    }
-    @media screen and(min-width: 801px){
-        body{
-            overflow: hidden;
         }
     }
 
@@ -34,7 +30,14 @@
                <tasksauce-app>
                </tasksauce-app>
         </main>
-
+<script>
+    window.onload = () => {
+        if(screen.width <= 800){
+            //On mobile this forces the setting of overflow to auto
+            document.body.style.overflow = 'auto';
+        }
+    };
+</script>
     </body>
 
 </html>
