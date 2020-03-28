@@ -139,6 +139,10 @@ tableRecord.innerHTML = `
     .trow:hover > #delete_btn{
         display: inline-block;
     } 
+    .trow.active:hover > #delete_btn{
+        display: none;
+    } 
+    
     div > input {
         text-align: center;
         border: none;
@@ -147,6 +151,9 @@ tableRecord.innerHTML = `
     #delete_btn{
         display: inline-block;
         margin-left: -2em;
+    }
+    .active > #delete_btn{
+        display: none;
     }
     }
     .active{

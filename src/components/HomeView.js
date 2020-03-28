@@ -125,7 +125,13 @@ class HomeView extends HTMLElement{
         sessionStorage.setItem("taskQueueContent", JSON.stringify(this.taskQueue.getQueue()));
         if(this.timer.isRunning()){
             Swal.fire({
-                icon: 'warning',
+                customClass: {
+                    title: 'bold',
+                    confirmButton: 'bold',
+                    content: 'regular',
+                    cancelButton: 'bold'
+                },
+                icon: 'question',
                 title: 'Are you sure?',
                 text: 'Changing page will stop the timer. Anyway the task queue will be restored if you come back.',
                 confirmButtonText: "Go to statistics",
