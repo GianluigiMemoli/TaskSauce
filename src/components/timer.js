@@ -43,7 +43,7 @@ const timerTemplate = document.createElement("template");
 </audio>
 <div id="timer_container" class="white-box shady roundy">
         <div id="prog"></div>
-        <div id="btns"><button id="start_pause_btn">Start</button><button id="stop_btn">Stop</button></div>
+        <div id="btns"><input type="image" src="../../icons/play.svg" id="start_pause_btn"><input type="image" src="../../icons/stop.svg" id="stop_btn"></div>
 </div>          
 `;
 
@@ -54,6 +54,7 @@ const timerTemplate = document.createElement("template");
         this.shadowRoot.appendChild(timerTemplate.content.cloneNode(true));
         //Current time
         this.state = STOP;
+        this.timeout = 0;
     }
 
     connectedCallback() {
@@ -74,11 +75,6 @@ const timerTemplate = document.createElement("template");
 
     }
 
-    /*
-    * step: function(state, circle, attachment) {
-        circle.path.setAttribute('stroke', state.color);
-    },
-    * */
     set phase(value){
         this._phase = value;
         if(value === BREAK_PHASE) {
@@ -93,19 +89,30 @@ const timerTemplate = document.createElement("template");
         return this._phase;
     }
 
+    _initWorker(){
+        this.killWorker();
+        if(window.Worker){
+            console.log("worker setup");
+            this._timeWorker = new Worker("TimerWorker.js");
+            this._timeWorker.addEventListener("message", this._updateTime.bind(this));
+            this._timeWorker.postMessage("START");
+            console.log(this._timeWorker);
+            this._timeWorker.onerror = (err) => alert(err);
+        }
+    }
+    killWorker(){
+        if(this._timeWorker){
+            this._timeWorker.terminate();
+        }
+    }
     _handleStartPause(){
-        console.log("premuto");
-        console.log(this.state);
         if(this.state === STOP) {
             console.log("start event firing");
             this._askNextTask();
-            //If there is any, the APPSAUCE will add a task to the timer
         } else if(this.state === START){
             this.dispatchEvent(new CustomEvent("pause", {bubbles: true, composed: true}));
             this._pause();
-            //Here YOU MUST CALL THE PAUSE METHOD AND NOT LET THE APPSAUCE COMPONENT CALL IT!
         } else if(this.state === PAUSE){
-
             this._resume();
         }
     }
@@ -114,32 +121,37 @@ const timerTemplate = document.createElement("template");
         console.log("Setting: "+task);
         this.servingTask = task;
         this._start(task.pomodoro, POMODORO_PHASE);
-        this.startPauseBtn.innerHTML = "Pause";
+        console.log("SET");
+        console.log(this.startPauseBtn.src);
+        this.startPauseBtn.src = "../../icons/pause.svg";
+        console.log(this.startPauseBtn.src);
     }
 
 
 
     _setupTimer(timeout) {
+        this._initWorker();
         this.timeout = timeout;
         this.progressStep = 1 / timeout;
-        this.interval = setInterval(this._updateTime.bind(this), 100);
     }
 
     _updateTime(){
+        console.log("updating");
         if(this.timeout === 0 && this.phase === POMODORO_PHASE){
-            clearInterval(this.interval);
             console.log("stopped -> break");
             this._start(this.servingTask.breakDuration, BREAK_PHASE);
+            this._timeWorker.postMessage("STOP");
             this._pause();
+            this.killWorker();
             this.timerBuzz.play();
         } else if (this.phase === BREAK_PHASE && this.timeout === 0){
             this._stop();
             this.dispatchEvent(new CustomEvent("task_end", {composed: true, bubbles: true, detail: {task: this.servingTask}}));
+            this.timerBuzz.play();
         } else{
             this.timeout--;
             let minutes = Math.floor(this.timeout / 60);
             let seconds = this.timeout % 60;
-            console.log(`min: ${minutes} sec: ${seconds}`);
             this._setTime(minutes, seconds);
         }
     }
@@ -147,7 +159,6 @@ const timerTemplate = document.createElement("template");
 
     _setTime(minutes, seconds){
         this.progressBar.setText(`${_stylizeTime(minutes)}:${_stylizeTime(seconds)}`);
-        //this.progressBar.set(this.progressBar.value() - this.progressStep);
         let newProgress;
         if (this.progressBar.value() - this.progressStep < 0){
             newProgress = 0;
@@ -160,6 +171,7 @@ const timerTemplate = document.createElement("template");
     }
 
      _start(timeout, phase){
+        this.timerBuzz.pause();
          this.state = START;
          this.phase = phase;
          if (phase === BREAK_PHASE)
@@ -170,15 +182,17 @@ const timerTemplate = document.createElement("template");
          }
 
     _pause(){
-        clearInterval(this.interval);
-        this.startPauseBtn.innerHTML = "Start";
+        console.log('paused');
+        this.killWorker();
+        this.startPauseBtn.src = "../../icons/play.svg";
         this.state = PAUSE;
     }
 
     _stop(){
-        clearInterval(this.interval);
+        this.timeout = 0;
+        this.killWorker();
         this.timerBuzz.pause();
-        this.startPauseBtn.innerHTML = "Start";
+        this.startPauseBtn.src = "../../icons/play.svg";
         this.state = STOP;
         this.phase = POMODORO_PHASE;
         this._setTime(0, 0);
@@ -189,7 +203,7 @@ const timerTemplate = document.createElement("template");
     _resume(){
         this.timerBuzz.pause();
         this.state = START;
-        this.startPauseBtn.innerHTML = "Pause";
+        this.startPauseBtn.src = "../../icons/pause.svg";
         this._setupTimer(this.timeout);
     }
     _askNextTask(){
@@ -207,11 +221,15 @@ const timerTemplate = document.createElement("template");
         this.progressBar.animate(progress, {
             duration: duration,
             offset: 0
-        },
-            function () {
-                console.log('Animation has finished');
-            });
+        });
     }
+
+    isRunning(){
+        return this.timeout > 0;
+    }
+
+
+
 }
 
 function _stylizeTime(time){

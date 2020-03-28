@@ -14,7 +14,7 @@ schedulerTemplate.innerHTML = `
         
         #task_name{
             background-color white;
-            border: none;
+            border: 3px solid white;
             height: 2.5em;            
             border-radius: 90px;          
             padding: 0.2em;                          

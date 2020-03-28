@@ -54,9 +54,9 @@ ul > li{
     background-color:  hsl(208, 79%, 28%);;
     border-style: none;
     border-radius: 5px;
-    -webkit-box-shadow: -0.5px 2px 10px 5px rgba(168,168,168,1);
-    -moz-box-shadow: -0.5px 2px 10px 5px rgba(168,168,168,1);
-    box-shadow: -0.5px 2px 10px 5px rgba(168,168,168,1);
+    -webkit-box-shadow: 2px 1px 20px 0.1px rgba(168,168,168,1);
+    -moz-box-shadow: 2px 1px 20px 0.1px rgba(168,168,168,1);
+    box-shadow: 2px 1px 20px 0.1px rgba(168,168,168,1);
     transition: box-shadow 0.3s ease;
 }
 
@@ -68,18 +68,18 @@ ul > li{
 #btnDropDB{
     padding: 1em;
     color: #fff;
-    background-color:  hsl(21, 100%, 72%);
+    background-color:  hsl(4, 98%, 56%);
     border-style: none;
     border-radius: 5px;
-    -webkit-box-shadow: -0.5px 2px 10px 5px rgba(168,168,168,1);
-    -moz-box-shadow: -0.5px 2px 10px 5px rgba(168,168,168,1);
-    box-shadow: -0.5px 2px 10px 5px rgba(168,168,168,1);
+    -webkit-box-shadow: 2px 1px 20px 0.1px rgba(168,168,168,1);
+    -moz-box-shadow: 2px 1px 20px 0.1px rgba(168,168,168,1);
+    box-shadow: 2px 1px 20px 0.1px rgba(168,168,168,1);
     transition: box-shadow 0.3s ease;
     
 }
 
 #btnDropDB:hover{
-    background-color:  hsl(21, 100%, 82%);
+    background-color:  hsl(4, 98%, 60%);
     box-shadow: none;
 }
 
@@ -93,13 +93,17 @@ ul > li{
     width: 100vw;
     height: 50vh;
 }    
+
+.chart-grid{
+    width: 30vw;        
+}
 }
 </style>
 
 <div class="chart-grid row-1 col-1 justify-i-center grey-box">
     <div id="chart-container" class="shady white-box roundy">   
         <ul id="stats_controller"><li><button class="bold" id="generalBtn">General  Overview</button></li><li><button class="bold" id="monthlyBtn">Monthly Overview</button></li><li id="btnAtEnd"><button id="btnDropDB" class="bold">Delete history</button></li></ul>     
-        <canvas id="chart" width="90%"></canvas>
+        <canvas id="chart" width="100%"></canvas>
     </div>
 </div>
 
@@ -116,19 +120,20 @@ class Stats extends HTMLElement {
         super();
         this.attachShadow({mode: "open"});
         this.shadowRoot.appendChild(layout.content.cloneNode(true));
-        console.log("Stetistics cretitcs");
     }
 
     _generalOverviewChart(savedTasks) {
+        if(this._chart){
+            this._chart.destroy();
+        }
         let labels = [];
         let arraySizes = [];
         for (let taskName in savedTasks) {
             labels.push(taskName);
             arraySizes.push(savedTasks[taskName].length);
         }
-
         let ctx = this.shadowRoot.getElementById("chart");
-        let chart = new Chart(ctx, {
+        this._chart = new Chart(ctx, {
             type: "bar",
             data: {
                 labels: labels,
@@ -196,9 +201,12 @@ class Stats extends HTMLElement {
 
 
     __monthlyOverviewChart(tasks) {
+        if(this._chart){
+            this._chart.destroy();
+        }
         let ctx = this.shadowRoot.getElementById("chart");
         let datasets = this.__groupByMonth(tasks);
-        var chart = new Chart(ctx, {
+        this._chart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'Semptember', 'October', 'November', 'December'],
@@ -272,14 +280,20 @@ class Stats extends HTMLElement {
         console.log(context);
         context.pathname = "";
     }
+    _removeFromChart(){
+        this._chart.data.labels = [];
+        this._chart.data.datasets.forEach((dataset) => {
+            dataset.data = [];
+        });
+        this._chart.update();
 
+    }
     _deleteDB(){
-        //console.log("DEL");
         TaskDAO.build().then(
             openedDB => {
                 openedDB.clearTasks().then(
-                    result => //console.log("cleared"),
-                        error => console.error(error)
+                    result => this._removeFromChart(),
+                    error => console.error(error)
                 )
             },
             error => console.error(error)

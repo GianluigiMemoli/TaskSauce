@@ -5,15 +5,14 @@ layoutGrid.innerHTML = `
  @import "../../style/layout.css"; 
  @import "../../style/grid_behaviour.css";
  @import "../../style/typography.css";
- @import '../../node_modules/material-design-icons/iconfont/material-icons.css';
+ @import "../../node_modules/intro.js/introjs.css"
  :host{
     margin: 0;  
     display: block;     
 }
  a {    
     color: white;
-    font-size: 52px;
-        
+    font-size: 52px;        
  }
  
  #view{
@@ -67,7 +66,9 @@ li{
     #layout{
         height: 100vh;        
     }    
-
+    img{
+        vertical-align: middle;
+    }
 }
 @media screen and (min-width: 801px){
 #navbar{
@@ -95,16 +96,15 @@ ul{
 </style>
     <div id="layout" class="row-1 row-filling row-s-2-nav-layout col-2-nav-layout col-s-1 grey-box">
         <div id="navbar" class="row-s-start-1 col-start-1 col-end-1 grey-box">
-            <span id="brand" class="bold">Tasksauce</span>
+            <span id="brand"  class="bold">Tasksauce</span>
             <ul>
-                <li><a href="/"><span class='material-icons md-36'>timer</span></a></li>
-                <li><a href="/stats"><span class='material-icons md-36'>show_chart</span></a></li>
+                <li><a  href="/"><img src="../../icons/timer.svg"></a></li>
+                <li><a href="/stats"><img src="../../icons/chart.svg"></a></li>
             </ul>        
         </div>        
-        <div id="view" class="row-s-start-2 justify-s-center col-start-2 justify-i-center align-i-center grey-box"><slot></slot></div>
-        
+        <div id="view" class="row-s-start-2 justify-s-center col-start-2 justify-i-center align-i-center grey-box"><slot></slot></div>                
     </div>
-   
+    
 
 `;
 
@@ -143,23 +143,7 @@ class TaskSauceApp extends HTMLElement{
             console.log(navbarWidth);
             brand.style.lineHeight = `${navbarWidth}`;
             brand.style.marginBottom = `${navbarWidth}`;
-        } else {
-            let brand = this.shadowRoot.querySelector("#brand");
-            let navbar = this.shadowRoot.querySelector("#navbar");
-            let icons = this.shadowRoot.querySelectorAll("ul > li > a > span.material-icons");
-            console.log("icons");
-            console.log(icons);
-            console.log(navbar);
-            let navbarHeight = window.getComputedStyle(navbar).getPropertyValue("height");
-            console.log(navbarHeight);
-            brand.style.lineHeight = `${navbarHeight}`;
-                icons.forEach((icon) => {
-                    console.log("icon");
-                    console.log(icon);
-                    icon.style.height = `${navbarHeight}`;
-                    icon.style.lineHeight = `${navbarHeight}`;
-            });
-         }
+        }
         }
 
 

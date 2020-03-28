@@ -37,13 +37,16 @@ tableTemplate.innerHTML = `
     */
     display: grid;
     width: 100%;
-    grid-auto-rows: 100%;
+    grid-auto-rows: 1fr;
     row-gap: 1em;
+    justify-content: center | stretch;    
 }
 .trow{
     display: grid;
-    grid-template-columns: 33% 33% 33% 10%;          
-    justify-content: left;          
+    grid-template-columns: 33% 33% 33% 1%;          
+    justify-content: stretch; 
+    align-items: center;         
+    
 }
 .tdata{
     display: inline-block;
@@ -87,7 +90,6 @@ tableTemplate.innerHTML = `
 
 .tdata > input {
     width: 40%;       
-    margin-top: 2.5px; 
 }
 
 @media screen and (max-width: 800px){
@@ -109,10 +111,10 @@ tableTemplate.innerHTML = `
                 <span>Name</span>
             </div>
             <div class="tdata col23">
-                <span>Pomodoro</span>
+                <span>Pomodoro<br><small>(min)</small></span>
             </div>
             <div class="tdata col34">
-                <span>Break</span>
+                <span>Break<br><small>(min)</small></span>
             </div>            
         </div>        
     </div>
@@ -130,18 +132,21 @@ tableRecord.innerHTML = `
     }
     #delete_btn{
         display: none;
-        margin-left: -1.5em;  
+        margin-left: -2em;  
         margin-top: 7px;
     }
 
     .trow:hover > #delete_btn{
         display: inline-block;
     } 
-    
+    div > input {
+        text-align: center;
+        border: none;
+    }
     @media screen and (max-width: 800px){
     #delete_btn{
         display: inline-block;
-        margin-left: -1.5em;
+        margin-left: -2em;
     }
     }
     .active{
@@ -152,7 +157,7 @@ tableRecord.innerHTML = `
      <div class="tdata col1"><span id="name_value"></span></div>
      <div class="tdata col2"><input id="pomodoro_minutes" type="number"></div>
      <div class="tdata col3"><input id="break_minutes" type="number"></div>                 
-     <a id="delete_btn"><span class="material-icons">delete</span></a>     
+     <a id="delete_btn"><img src="../../icons/delete.svg"></a>     
     </div>
 `;
 
@@ -269,9 +274,11 @@ class TaskQueue extends HTMLElement{
     }
 
     releaseTask(){
-        let firstTaskIndex = Object.keys(this.queue)[0];
-        let row = this._getRow(firstTaskIndex);
-        row.classList.remove("active");
+        if(Object.keys(this.queue).length > 0){
+            let firstTaskIndex = Object.keys(this.queue)[0];
+            let row = this._getRow(firstTaskIndex);
+            row.classList.remove("active");
+        }
     }
 
     hasNext(){
