@@ -14,6 +14,6 @@
     "webpack-cli": "^3.3.11"
   },
   "scripts": {
-    "start": "static-server -i index.html -n index.html -p 9081"
+    "start": "static-server -i index.html -n index.html"
   }
 }
