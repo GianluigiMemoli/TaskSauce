@@ -144,6 +144,17 @@ class TaskSauceApp extends HTMLElement{
             brand.style.lineHeight = `${navbarWidth}`;
             brand.style.marginBottom = `${navbarWidth}`;
         }
+         else {
+            let brand = this.shadowRoot.querySelector("#brand");
+            let navbar = this.shadowRoot.querySelector("#navbar");
+            let icons = this.shadowRoot.querySelectorAll("ul > li > a > img");
+            console.log("icons");
+            console.log(icons);
+            console.log(navbar);
+            let navbarHeight = window.getComputedStyle(navbar).getPropertyValue("height");
+            console.log(navbarHeight);
+            brand.style.lineHeight = `${navbarHeight}`;
+         }
         }
 
 
