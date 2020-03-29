@@ -15,7 +15,7 @@ class TaskDAO_ {
 
    static openDB() {
         return new Promise(((resolve, reject) => {
-            let openRequest = indexedDB.open(DB_NAME, 4);
+            let openRequest = indexedDB.open(DB_NAME, 1);
             openRequest.onupgradeneeded = function () {
                 let db = openRequest.result;
                 if (!db.objectStoreNames.contains(TASK_STORE)) {

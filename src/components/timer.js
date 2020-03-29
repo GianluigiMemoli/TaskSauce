@@ -89,14 +89,15 @@ const timerTemplate = document.createElement("template");
         return this._phase;
     }
 
-    _initWorker(){
+    _initWorker(start, step){
         this.killWorker();
         if(window.Worker){
             console.log("worker setup");
             this._timeWorker = new Worker("TimerWorker.js");
-            this._timeWorker.addEventListener("message", this._updateTime.bind(this));
-            this._timeWorker.postMessage("START");
-            console.log(this._timeWorker);
+            this._timeWorker.addEventListener("message", event => {
+                this._updateTime(event.data);
+            });
+            this._timeWorker.postMessage(["START", start, step]);
             this._timeWorker.onerror = (err) => alert(err);
         }
     }
@@ -130,17 +131,18 @@ const timerTemplate = document.createElement("template");
 
 
     _setupTimer(timeout) {
-        this._initWorker();
         this.timeout = timeout;
-        this.progressStep = 1 / timeout;
+        this.progressStep = this.progressBar.value() / timeout;
+        this._initWorker(this.progressBar.value(), this.progressStep);
     }
 
-    _updateTime(){
+    _updateTime(progressValue){
+
         console.log("updating");
         if(this.timeout === 0 && this.phase === POMODORO_PHASE){
             console.log("stopped -> break");
             this._start(this.servingTask.breakDuration, BREAK_PHASE);
-            this._timeWorker.postMessage("STOP");
+            this._timeWorker.postMessage(["STOP"]);
             this._pause();
             this.killWorker();
             this.timerBuzz.play();
@@ -152,22 +154,16 @@ const timerTemplate = document.createElement("template");
             this.timeout--;
             let minutes = Math.floor(this.timeout / 60);
             let seconds = this.timeout % 60;
-            this._setTime(minutes, seconds);
+            this._setTime(minutes, seconds, progressValue);
         }
     }
 
 
-    _setTime(minutes, seconds){
+    _setTime(minutes, seconds, progressValue){
         this.progressBar.setText(`${_stylizeTime(minutes)}:${_stylizeTime(seconds)}`);
-        let newProgress;
-        if (this.progressBar.value() - this.progressStep < 0){
-            newProgress = 0;
-        }
-        else {
-            newProgress = this.progressBar.value() - this.progressStep;
-        }
 
-        this._loadProgressbarProgress(newProgress, 50);
+
+        this._loadProgressbarProgress(progressValue, 100);
     }
 
      _start(timeout, phase){
